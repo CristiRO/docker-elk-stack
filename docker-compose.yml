@@ -1,10 +1,9 @@
 version: '2'
 services:
-  mongodb:
-    image: mongo:3
-  
   elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.2
+    image: "docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.4"
+    volumes:
+      - ./elasticsearch/data:/usr/share/elasticsearch/data
     environment:
       - http.host=0.0.0.0
       - transport.host=localhost
@@ -19,45 +18,23 @@ services:
       - '9200:9200'
   
   kibana:
-    image: "docker.elastic.co/kibana/kibana-oss:6.8.2"
+    image: "docker.elastic.co/kibana/kibana-oss:6.8.4"
     environment:
     - server.port=127.0.0.1:5601
     - elasticsearch.url="http://elasticsearch:9200"
     - server.name="kibana"
-    ports:
-    - '5601:5601'
     depends_on:
     - 'elasticsearch'
+    ports:
+    - '5601:5601'
 
   logstash:
-    image: "docker.elastic.co/logstash/logstash-oss:6.8.2"
+    image: "docker.elastic.co/logstash/logstash-oss:6.8.4"
     volumes:
-      - ./:/config-dir
+      - ./logstash/config:/config-dir
+      - ./logstash/data:/usr/share/logstash/data
     command: logstash -f /config-dir/pipeline.conf
     depends_on:
       - elasticsearch
     ports:
-      - "5044"
-
-  # Default user is admin:admin
-  graylog:
-    image: graylog/graylog:3.1
-    environment:
-      - GRAYLOG_HTTP_EXTERNAL_URI=http://127.0.0.1:9000/
-    links:
-      - mongodb:mongo
-      - elasticsearch
-    depends_on:
-      - mongodb
-      - elasticsearch
-    ports:
-      # Graylog web interface and REST API
-      - 9000:9000
-      # Syslog TCP
-      - 1514:1514
-      # Syslog UDP
-      - 1514:1514/udp
-      # GELF TCP
-      - 12201:12201
-      # GELF UDP
-      - 12201:12201/udp
+      - "5400" # input directly from parser
