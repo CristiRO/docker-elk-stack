@@ -3,6 +3,7 @@ services:
   elasticsearch:
     image: "docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.4"
     volumes:
+      # TODO: write in README that this directory should be created before running `docker-compose up` with user ownership
       - ./elasticsearch/data:/usr/share/elasticsearch/data
     environment:
       - http.host=0.0.0.0
@@ -38,3 +39,12 @@ services:
       - elasticsearch
     ports:
       - "5400" # input directly from parser
+
+  # filebeat:
+  #   image: "docker.elastic.co/beats/filebeat-oss:6.8.4"
+  #   volumes:
+  #     - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+  #     - ./filebeat/ApiCommands.log:/usr/share/filebeat/ApiCommands.log
+  #   depends_on:
+  #   - 'logstash'
+  #   command: filebeat -e -strict.perms=false
