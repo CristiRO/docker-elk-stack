@@ -3,18 +3,16 @@ services:
   elasticsearch:
     image: "docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.4"
     volumes:
-      # TODO: write in README that this directory should be created before running `docker-compose up` with user ownership
       - ./elasticsearch/data:/usr/share/elasticsearch/data
     environment:
       - http.host=0.0.0.0
       - transport.host=localhost
       - network.host=0.0.0.0
-      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - "ES_JAVA_OPTS=-Xms26G -Xmx26G"
     ulimits:
       memlock:
         soft: -1
         hard: -1
-    mem_limit: 2g
     ports:
       - '9200:9200'
   
@@ -29,22 +27,24 @@ services:
     ports:
     - '5601:5601'
 
-  logstash:
+  logstash-old-services:
     image: "docker.elastic.co/logstash/logstash-oss:6.8.4"
     volumes:
-      - ./logstash/config:/config-dir
-      - ./logstash/data:/usr/share/logstash/data
+      - ./logstash/old-services/config:/config-dir:Z
+      - ./logstash/old-services/data:/usr/share/logstash/data:Z
     command: logstash -f /config-dir/pipeline.conf
     depends_on:
       - elasticsearch
     ports:
-      - "5400" # input directly from parser
+      - '5400:5400'
 
-  # filebeat:
-  #   image: "docker.elastic.co/beats/filebeat-oss:6.8.4"
-  #   volumes:
-  #     - ./filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
-  #     - ./filebeat/ApiCommands.log:/usr/share/filebeat/ApiCommands.log
-  #   depends_on:
-  #   - 'logstash'
-  #   command: filebeat -e -strict.perms=false
+  logstash-new-services:
+    image: "docker.elastic.co/logstash/logstash-oss:6.8.4"
+    volumes:
+      - ./logstash/new-services/config:/config-dir:Z
+      - ./logstash/new-services/data:/usr/share/logstash/data:Z
+    command: logstash -f /config-dir/pipeline.conf
+    depends_on:
+      - elasticsearch
+    ports:
+      - '5401:5401'
