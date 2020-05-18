@@ -1,7 +1,7 @@
 version: '2'
 services:
   elasticsearch:
-    image: "docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.4"
+    image: "docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.8"
     volumes:
       - ./elasticsearch/data:/usr/share/elasticsearch/data
     environment:
@@ -15,9 +15,10 @@ services:
         hard: -1
     ports:
       - '9200:9200'
+      - '9300:9300'
   
   kibana:
-    image: "docker.elastic.co/kibana/kibana-oss:6.8.4"
+    image: "docker.elastic.co/kibana/kibana-oss:6.8.8"
     environment:
     - server.port=127.0.0.1:5601
     - elasticsearch.url="http://elasticsearch:9200"
@@ -28,7 +29,7 @@ services:
     - '5601:5601'
 
   logstash-old-services:
-    image: "docker.elastic.co/logstash/logstash-oss:6.8.4"
+    image: "docker.elastic.co/logstash/logstash-oss:6.8.8"
     volumes:
       - ./logstash/old-services/config:/config-dir:Z
       - ./logstash/old-services/data:/usr/share/logstash/data:Z
@@ -39,7 +40,7 @@ services:
       - '5400:5400'
 
   logstash-new-services:
-    image: "docker.elastic.co/logstash/logstash-oss:6.8.4"
+    image: "docker.elastic.co/logstash/logstash-oss:6.8.8"
     volumes:
       - ./logstash/new-services/config:/config-dir:Z
       - ./logstash/new-services/data:/usr/share/logstash/data:Z
