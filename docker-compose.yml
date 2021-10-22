@@ -50,6 +50,7 @@ services:
     restart: always
 
   logstash-new-services:
+    environment: ES_LOGSTASH_PASSWORD=${ES_LOGSTASH_PASSWORD}
     image: "docker.elastic.co/logstash/logstash-oss:6.8.8"
     volumes:
       - ./logstash/new-services/config:/config-dir:Z
