@@ -5,9 +5,15 @@ services:
     volumes:
       - ./elasticsearch/data:/usr/share/elasticsearch/data
     environment:
-      - http.host=0.0.0.0
-      - transport.host=localhost
-      - network.host=0.0.0.0
+      - "http.host=0.0.0.0"
+      - "transport.host=0.0.0.0"
+      - "network.host=0.0.0.0"
+      - node.name=${ES_NODE_NAME}
+      - cluster.name=${ES_CLUSTER_NAME}
+      - "network.publish_host=${ES_NETWORK_PUBLISH_HOST}"
+      - "transport.publish_host=${ES_TRANSPORT_PUBLISH_HOST}"
+      - discovery.zen.minimum_master_nodes=${ES_ZEN_MINIMUM_MASTER_NODES}
+      - "discovery.zen.ping.unicast.hosts=${ES_ZEN_PING_UNICAST_HOSTS}"
       - "ES_JAVA_OPTS=-Xms26G -Xmx26G"
     ulimits:
       memlock:
@@ -16,7 +22,9 @@ services:
     ports:
       - '9200:9200'
       - '9300:9300'
-  
+      - '9301:9301'
+    restart: always
+
   kibana:
     image: "docker.elastic.co/kibana/kibana-oss:6.8.8"
     environment:
@@ -27,6 +35,7 @@ services:
     - 'elasticsearch'
     ports:
     - '5601:5601'
+    restart: always
 
   logstash-old-services:
     image: "docker.elastic.co/logstash/logstash-oss:6.8.8"
@@ -38,6 +47,7 @@ services:
       - elasticsearch
     ports:
       - '5400:5400'
+    restart: always
 
   logstash-new-services:
     image: "docker.elastic.co/logstash/logstash-oss:6.8.8"
@@ -49,3 +59,4 @@ services:
       - elasticsearch
     ports:
       - '5401:5401'
+    restart: always
