@@ -62,5 +62,5 @@ services:
       - elasticsearch
     ports:
       - '5401:5401'
-      - '9601:9601'
+      - '9601:9600'
     restart: always
