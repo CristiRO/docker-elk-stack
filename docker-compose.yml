@@ -47,6 +47,7 @@ services:
       - elasticsearch
     ports:
       - '5400:5400'
+      - '9600:9600'
     restart: always
 
   logstash-new-services:
@@ -61,4 +62,5 @@ services:
       - elasticsearch
     ports:
       - '5401:5401'
+      - '9601:9601'
     restart: always
