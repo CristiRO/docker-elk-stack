@@ -64,3 +64,18 @@ services:
       - '5401:5401'
       - '9601:9600'
     restart: always
+
+  logstash-sitesonar:
+    environment:
+      - ES_LOGSTASH_PASSWORD=${ES_LOGSTASH_PASSWORD}
+    image: "docker.elastic.co/logstash/logstash-oss:6.8.8"
+    volumes:
+      - ./logstash/sitesonar/config:/config-dir:Z
+      - ./logstash/sitesonar/data:/usr/share/logstash/data:Z
+    command: logstash -f /config-dir/pipeline.conf
+    depends_on:
+      - elasticsearch
+    ports:
+      - '5402:5402'
+      - '9602:9600'
+    restart: always
