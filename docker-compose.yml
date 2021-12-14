@@ -43,8 +43,6 @@ services:
       - ./logstash/old-services/config:/config-dir:Z
       - ./logstash/old-services/data:/usr/share/logstash/data:Z
     command: logstash -f /config-dir/pipeline.conf
-    depends_on:
-      - elasticsearch
     ports:
       - '5400:5400'
       - '9600:9600'
@@ -58,8 +56,6 @@ services:
       - ./logstash/new-services/config:/config-dir:Z
       - ./logstash/new-services/data:/usr/share/logstash/data:Z
     command: logstash -f /config-dir/pipeline.conf
-    depends_on:
-      - elasticsearch
     ports:
       - '5401:5401'
       - '9601:9600'
@@ -73,8 +69,6 @@ services:
       - ./logstash/sitesonar/config:/config-dir:Z
       - ./logstash/sitesonar/data:/usr/share/logstash/data:Z
     command: logstash -f /config-dir/pipeline.conf
-    depends_on:
-      - elasticsearch
     ports:
       - '5402:5402'
       - '9602:9600'
