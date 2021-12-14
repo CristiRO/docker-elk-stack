@@ -1,50 +1,11 @@
 version: '2'
 services:
-  elasticsearch:
-    image: "docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.8"
-    volumes:
-      - ./elasticsearch/data:/usr/share/elasticsearch/data
-    environment:
-      - "http.host=0.0.0.0"
-      - "transport.host=0.0.0.0"
-      - "network.host=0.0.0.0"
-      - node.name=${ES_NODE_NAME}
-      - cluster.name=${ES_CLUSTER_NAME}
-      - "network.publish_host=${ES_NETWORK_PUBLISH_HOST}"
-      - "transport.publish_host=${ES_TRANSPORT_PUBLISH_HOST}"
-      - discovery.zen.minimum_master_nodes=${ES_ZEN_MINIMUM_MASTER_NODES}
-      - "discovery.zen.ping.unicast.hosts=${ES_ZEN_PING_UNICAST_HOSTS}"
-      - "ES_JAVA_OPTS=-Xms26G -Xmx26G"
-    ulimits:
-      memlock:
-        soft: -1
-        hard: -1
-    ports:
-      - '9200:9200'
-      - '9300:9300'
-      - '9301:9301'
-    restart: always
-
-  kibana:
-    image: "docker.elastic.co/kibana/kibana-oss:6.8.8"
-    environment:
-    - server.port=127.0.0.1:5601
-    - elasticsearch.url="http://elasticsearch:9200"
-    - server.name="kibana"
-    depends_on:
-    - 'elasticsearch'
-    ports:
-    - '5601:5601'
-    restart: always
-
   logstash-old-services:
-    image: "docker.elastic.co/logstash/logstash-oss:6.8.8"
+    image: "docker.elastic.co/logstash/logstash-oss:6.8.21"
     volumes:
       - ./logstash/old-services/config:/config-dir:Z
       - ./logstash/old-services/data:/usr/share/logstash/data:Z
     command: logstash -f /config-dir/pipeline.conf
-    depends_on:
-      - elasticsearch
     ports:
       - '5400:5400'
       - '9600:9600'
@@ -53,13 +14,11 @@ services:
   logstash-new-services:
     environment:
       - ES_LOGSTASH_PASSWORD=${ES_LOGSTASH_PASSWORD}
-    image: "docker.elastic.co/logstash/logstash-oss:6.8.8"
+    image: "docker.elastic.co/logstash/logstash-oss:6.8.21"
     volumes:
       - ./logstash/new-services/config:/config-dir:Z
       - ./logstash/new-services/data:/usr/share/logstash/data:Z
     command: logstash -f /config-dir/pipeline.conf
-    depends_on:
-      - elasticsearch
     ports:
       - '5401:5401'
       - '9601:9600'
@@ -68,13 +27,11 @@ services:
   logstash-sitesonar:
     environment:
       - ES_LOGSTASH_PASSWORD=${ES_LOGSTASH_PASSWORD}
-    image: "docker.elastic.co/logstash/logstash-oss:6.8.8"
+    image: "docker.elastic.co/logstash/logstash-oss:6.8.21"
     volumes:
       - ./logstash/sitesonar/config:/config-dir:Z
       - ./logstash/sitesonar/data:/usr/share/logstash/data:Z
     command: logstash -f /config-dir/pipeline.conf
-    depends_on:
-      - elasticsearch
     ports:
       - '5402:5402'
       - '9602:9600'
