@@ -1,15 +1,15 @@
 version: '2'
 services:
-  logstash-old-services:
-    image: "docker.elastic.co/logstash/logstash-oss:6.8.21"
-    volumes:
-      - ./logstash/old-services/config:/config-dir:Z
-      - ./logstash/old-services/data:/usr/share/logstash/data:Z
-    command: logstash -f /config-dir/pipeline.conf
-    ports:
-      - '5400:5400'
-      - '9600:9600'
-    restart: always
+  # logstash-old-services:
+  #   image: "docker.elastic.co/logstash/logstash-oss:6.8.21"
+  #   volumes:
+  #     - ./logstash/old-services/config:/config-dir:Z
+  #     - ./logstash/old-services/data:/usr/share/logstash/data:Z
+  #   command: logstash -f /config-dir/pipeline.conf
+  #   ports:
+  #     - '5400:5400'
+  #     - '9600:9600'
+  #   restart: always
 
   logstash-new-services:
     environment:
@@ -38,12 +38,11 @@ services:
     restart: always
 
   elasticsearch:
-    environment:
-      - ES_PATH_CONF=/usr/share/elasticsearch/elasticsearch.yml
     image: "docker.elastic.co/elasticsearch/elasticsearch:7.16.1"
     volumes:
-      - ./elasticsearch/data:/usr/share/elasticsearch/data
-      - ./elasticsearch.yml:/usr/share/elasticsearch/elasticsearch.yml
+      - ./elasticsearch/data:/var/data/elasticsearch
+      - ./elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml
+      - ./elasticsearch/logs:/var/logs/elasticsearch
     ulimits:
       memlock:
         soft: -1
