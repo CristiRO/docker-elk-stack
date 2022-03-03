@@ -2,38 +2,14 @@
 - pipeline.id: intake
   queue.type: persisted
   config.string: |
-    input {
-        tcp { port => 5401 }
-    }
-    output {
-        pipeline {
-            send_to => ["unprocessed-es", "popularity-es"]
-        }
-    }
+    input { tcp { port => 5401 } }
+    output { pipeline { send_to => ["unprocessed-es", "popularity-es"] } }
 - pipeline.id: unprocessed-es
   queue.type: persisted
   config.string: |
-    input {
-        pipeline {
-            address => "unprocessed-es"
-        }
-    }
-    filter {
-        json {
-            source => "message"
-        }
-        date {
-            match => ["timestamp", "UNIX_MS"]
-        }
-        mutate {
-            remove_field => [ "message" ]
-        }
-    }
-    output {
-        elasticsearch {
-            hosts => [ "elasticsearch:9200" ]
-            index => "logstash-new-%{+YYYY.MM.dd}"
-        }
+    input { pipeline { address => "unprocessed-es" } }
+    filter { json { source => "message" } date { match => ["timestamp", "UNIX_MS"] } mutate { remove_field => [ "message" ] } }
+    output { elasticsearch { hosts => [ "elasticsearch:9200" ] index => "logstash-new-%{+YYYY.MM.dd}" }
         elasticsearch {
             hosts => [ "https://es-alicecs1.cern.ch:443/es/" ]
             index => "alicecs1-jalien-%{+YYYY.MM.dd}"
@@ -46,44 +22,33 @@
 - pipeline.id: popularity-es
   queue.type: persisted
   config.string: |
-     input {
-        pipeline {
-             address => "popularity-es"
-        }
-    }
-    filter {
-        json {
-            source => "message"
-        }
-        date {
-            match => ["timestamp", "UNIX_MS"]
-        }
-        mutate {
-            remove_field => [ "message" ]
-        }
-        ruby {
-            code => '
-            command = event.get("command")
-            if (command == "access" or command == "PFNforReadOrDel")
-            arguments = []
-            arguments.push(event.get("arguments")).flatten!
-            arguments.each do |i|
-            if i.start_with?("/alice/")
-                event.set("file_path", i)
-                event.set("found", "true")
-                end
-            end
-            end
-            '
-        }
-        if [found] != "true" {
-            drop { }
-        }
-        mutate { remove_field => [ "found", "exitCode", "site", "address", "server", "server_uuid", "requestID", "port", "errorMessage", "clientID", "serverThreadID", "duration", "role", "user", "server_pid", "host", "arguments" ] }
-        }
+     input { pipeline { address => "popularity-es" } }
+     filter { json { source => "message" } date { match => ["timestamp", "UNIX_MS"] } mutate { remove_field => [ "message" ] }
+       ruby {
+         code => '
+         command = event.get("command")
+         if (command == "access" or command == "PFNforReadOrDel")
+           arguments = []
+           arguments.push(event.get("arguments")).flatten!
+           arguments.each do |i|
+           if i.start_with?("/alice/")
+              event.set("file_path", i)
+              event.set("found", "true")
+             end
+           end
+         end
+         '
+       }
+       if [found] != "true" {
+         drop { }
+       }
+       mutate { remove_field => [ "found", "exitCode", "site", "address", "server", "server_uuid", "requestID", "port", "errorMessage", "clientID", "serverThreadID", "duration", "role", "user", "server_pid", "host", "arguments" ] }
+     }
      output {
          elasticsearch {
              hosts => [ "elasticsearch:9200" ]
              index => "popularity-%{+YYYY.MM.dd}"
          }
      }
+
+
