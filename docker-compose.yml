@@ -17,8 +17,8 @@ services:
     image: "docker.elastic.co/logstash/logstash-oss:6.8.21"
     volumes:
       - ./logstash/new-services/config:/config-dir:Z
+      - ./logstash/new-services/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml:Z
       - ./logstash/new-services/data:/usr/share/logstash/data:Z
-    command: logstash -f /config-dir/pipeline.conf
     ports:
       - '5401:5401'
       - '9601:9600'
