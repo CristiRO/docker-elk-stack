@@ -6,6 +6,7 @@ services:
       - ./logstash/old-services/config:/config-dir:Z
       - ./logstash/old-services/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml:Z
       - ./logstash/old-services/data:/usr/share/logstash/data:Z
+    command: bash -c "bin/logstash-plugin install logstash-filter-prune && logstash"
     ports:
       - '5400:5400'
       - '9600:9600'
@@ -19,6 +20,7 @@ services:
       - ./logstash/new-services/config:/config-dir:Z
       - ./logstash/new-services/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml:Z
       - ./logstash/new-services/data:/usr/share/logstash/data:Z
+    command: bash -c "bin/logstash-plugin install logstash-filter-prune && logstash"
     ports:
       - '5401:5401'
       - '9601:9600'

@@ -86,7 +86,7 @@
         drop { }
       }
       prune {
-        whitelist_names => ["^file_path$"]
+        whitelist_names => ["^file_path$", "^\@timestamp$"]
       }
     }
     output {
