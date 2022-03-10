@@ -88,9 +88,10 @@
       prune {
         whitelist_names => ["^file_path$"]
       }
-      output {
-        elasticsearch {
-            hosts => [ "elasticsearch:9200" ]
-            index => "popularity-%{+YYYY.MM.dd}"
-        }
+    }
+    output {
+      elasticsearch {
+          hosts => [ "elasticsearch:9200" ]
+          index => "popularity-%{+YYYY.MM.dd}"
       }
+    }
