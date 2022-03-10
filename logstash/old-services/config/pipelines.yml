@@ -1,0 +1,96 @@
+---
+- pipeline.id: intake
+  queue.type: persisted
+  config.string: |
+    input {
+      tcp {
+        port => 5400
+        tcp_keep_alive => false
+      }
+    }
+    output { pipeline { send_to => ["unprocessed-es", "popularity-es"] } }
+- pipeline.id: unprocessed-es
+  queue.type: persisted
+  config.string: |
+    input { pipeline { address => "unprocessed-es" } }
+    filter {
+      # this is done in order for ES to interpret the message as a JSON object
+      json {
+          source => "message"
+      }
+
+      mutate {
+        convert => {
+          "elapsed" => "float"
+        }
+        copy => {
+          "elapsed" => "duration"
+        }
+      }
+
+      # this is used to import logs in retrospective (the @timestamp field will be set to the date the log was created)
+      date {
+          match => ["timestamp", "UNIX_MS"]
+      }
+
+      mutate {
+          remove_field => [ "message" ]
+      }
+    }
+    output {
+        elasticsearch {
+            hosts => [ "elasticsearch:9200" ]
+            index => "logstash-old-%{+YYYY.MM.dd}"
+        }
+    }
+- pipeline.id: popularity-es
+  queue.type: persisted
+  config.string: |
+    input { pipeline { address => "popularity-es" } }
+    filter {
+      # this is done in order for ES to interpret the message as a JSON object
+      json {
+          source => "message"
+      }
+
+      mutate {
+        convert => {
+          "elapsed" => "float"
+        }
+        copy => {
+          "elapsed" => "duration"
+        }
+      }
+
+      # this is used to import logs in retrospective (the @timestamp field will be set to the date the log was created)
+      date {
+          match => ["timestamp", "UNIX_MS"]
+      }
+
+      mutate {
+          remove_field => [ "message" ]
+      }
+
+      ruby {
+         code => '
+         command = event.get("arg_1")
+         event_arg2 = event.get("arg_2")
+         event_arg3 = event.get("arg_3")
+         if (command == "access" and event_arg2 == "read" and event_arg3.start_with?("/alice/"))
+           event.set("file_path", event_arg3)
+           event.set("found", "true")
+         end
+         '
+       }
+      if [found] != "true" {
+        drop { }
+      }
+      prune {
+        whitelist_names => ["^file_path$"]
+      }
+      output {
+        elasticsearch {
+            hosts => [ "elasticsearch:9200" ]
+            index => "popularity-%{+YYYY.MM.dd}"
+        }
+      }

@@ -27,13 +27,14 @@
        ruby {
          code => '
          command = event.get("command")
-         if (command == "access" or command == "PFNforReadOrDel")
+         event_args = event.get("arguments")
+         if ((command == "access" or command == "PFNforReadOrDel") and event_args.include? "read")
            arguments = []
-           arguments.push(event.get("arguments")).flatten!
+           arguments.push(event_args).flatten!
            arguments.each do |i|
            if i.start_with?("/alice/")
-              event.set("file_path", i)
-              event.set("found", "true")
+               event.set("file_path", i)
+               event.set("found", "true")
              end
            end
          end
@@ -42,7 +43,9 @@
        if [found] != "true" {
          drop { }
        }
-       mutate { remove_field => [ "found", "exitCode", "site", "address", "server", "server_uuid", "requestID", "port", "errorMessage", "clientID", "serverThreadID", "duration", "role", "user", "server_pid", "host", "arguments" ] }
+       prune {
+         whitelist_names => ["^file_path$"]
+       }
      }
      output {
          elasticsearch {
