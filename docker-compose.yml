@@ -39,6 +39,19 @@ services:
       - '9602:9600'
     restart: always
 
+  logstash-ccdb:
+    environment:
+      - ES_LOGSTASH_PASSWORD=${ES_LOGSTASH_PASSWORD}
+    image: "docker.elastic.co/logstash/logstash-oss:6.8.21"
+    volumes:
+      - ./logstash/ccdb/config:/config-dir:Z
+      - ./logstash/ccdb/data:/usr/share/logstash/data:Z
+    command: logstash -f /config-dir/pipeline.conf
+    ports:
+      - '5403:5403'
+      - '9603:9600'
+    restart: always
+
   elasticsearch:
     image: "docker.elastic.co/elasticsearch/elasticsearch:7.16.1"
     volumes:
