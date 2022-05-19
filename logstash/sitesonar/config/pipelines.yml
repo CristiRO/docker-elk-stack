@@ -1,0 +1,31 @@
+---
+- pipeline.id: intake
+  queue.type: persisted
+  config.string: |
+    input { tcp { port => 5402 } }
+    output { pipeline { send_to => ["unprocessed-es"] } }
+- pipeline.id: unprocessed-es
+  queue.type: persisted
+  config.string: |
+    input { pipeline { address => "unprocessed-es" } }
+    filter { json { source => "message" } date { match => ["last_updated", "UNIX"] } mutate { remove_field => [ "message" ] } }
+    output {
+      elasticsearch {
+            hosts => [ "https://es-alicecs1.cern.ch:443/es/" ]
+            index => "new-mapping-sitesonar-%{+YYYY.MM.dd}"
+            user => "logstash"
+            password => "${ES_LOGSTASH_PASSWORD}"
+            ssl => "true"
+            cacert => "/config-dir/ca/cern_grid_cert.pem"
+        }
+    }
+- pipeline.id: internal-logs
+  queue.type: persisted
+  config.string: |
+    input { file { path => "/usr/share/logstash/logs/*" } }
+    output {
+         elasticsearch {
+             hosts => [ "elasticsearch:9200" ]
+             index => "internal-logstash-sitesonar-%{+YYYY.MM.dd}"
+         }
+     }
