@@ -33,7 +33,6 @@ services:
     volumes:
       - ./logstash/sitesonar/config:/config-dir:Z
       - ./logstash/sitesonar/data:/usr/share/logstash/data:Z
-    command: logstash -f /config-dir/pipeline.conf
     ports:
       - '5402:5402'
       - '9602:9600'
