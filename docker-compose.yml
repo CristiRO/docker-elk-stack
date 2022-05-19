@@ -32,9 +32,10 @@ services:
     image: "docker.elastic.co/logstash/logstash-oss:6.8.21"
     volumes:
       - ./logstash/sitesonar/config:/config-dir:Z
-      - ./logstash/new-services/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml:Z
-      - ./logstash/new-services/config/log4j2.properties:/usr/share/logstash/config/log4j2.properties:Z
+      - ./logstash/sitesonar/config/pipelines.yml:/usr/share/logstash/config/pipelines.yml:Z
+      - ./logstash/sitesonar/config/log4j2.properties:/usr/share/logstash/config/log4j2.properties:Z
       - ./logstash/sitesonar/data:/usr/share/logstash/data:Z
+    command: "logstash"
     ports:
       - '5402:5402'
       - '9602:9600'
