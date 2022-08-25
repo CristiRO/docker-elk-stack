@@ -12,7 +12,7 @@
     output {
       elasticsearch {
             hosts => [ "https://es-alicecs1.cern.ch:443/es/" ]
-            index => "new-mapping-sitesonar-%{+YYYY.MM.dd}"
+            index => "new-mapping-sitesonar-%{+YYYY.MM}"
             user => "logstash"
             password => "${ES_LOGSTASH_PASSWORD}"
             ssl => "true"
@@ -26,6 +26,6 @@
     output {
          elasticsearch {
              hosts => [ "elasticsearch:9200" ]
-             index => "internal-logstash-sitesonar-%{+YYYY.MM.dd}"
+             index => "internal-logstash-sitesonar-%{+YYYY.MM}"
          }
      }
